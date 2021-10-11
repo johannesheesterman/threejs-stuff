@@ -10,45 +10,17 @@
             padding:0;
             margin:0;
             overflow:hidden;
-            width:100%;
-            height:100%;
-            display: flex;
-            flex-direction: row;
+            width:100vw;
+            height:100vh;
         }
-        #editors{
-            width:200px;
-        }
-            #editors .editor-row{
-                display: block;
-            }
-
-                #editors .editor-row input{
-                    width:100%;
-                    padding:8px;
-                }
-
         #graph{
-            flex:1;
             height:100%;
-        }
-
-        #formula-input{
-            z-index: 2;
-            position: fixed;
-            left:24px;
-            bottom:24px;
         }
     </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/stats.js/16/Stats.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dat-gui/0.7.7/dat.gui.min.js"></script>
 </head>
 <body>
-    <div>
-        <div id="editors">
-        </div>
-        <button id="add-graph-btn">+ Add Graph</button>
-
-    </div>
-    
     <div id="graph"></div>
     <script src="index.js" type="module"></script>
 </body>

@@ -2,31 +2,33 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.121.1/build/three.m
 import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.121.1/examples/jsm/controls/OrbitControls.js';
 
 
-var stats = new Stats();
-stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
-stats.dom.style.left = '200px';
-stats.dom.style.position = 'fixed';
-document.body.appendChild( stats.dom );
-
 var graphs = [
-    {
-        formulaValue: 'Math.sin((x+t)*Math.PI)',
-        color: 0x00ffff,
-        wireframe: true
-    },
+    // {
+    //     formulaValue: 'Math.sin((x+t)*Math.PI)',
+    //     color: 0x00ffff,
+    //     wireframe: true
+    // },
 ];
 
-var addGraphBtn = document.getElementById('add-graph-btn');
-addGraphBtn.addEventListener('click', () => {
-    let newGraph = {
-        formulaValue: 'x**2',
-        color: 0xff0000,
-        wireframe: true
-    };
-    graphs.push(newGraph);
-    editors.appendChild(buildEditorElement(newGraph));
-    renderGraph(newGraph);
-});
+var stats;
+var gui, graphsFolder;
+initializeStats();
+initializeGui();
+
+
+
+
+// var addGraphBtn = document.getElementById('add-graph-btn');
+// addGraphBtn.addEventListener('click', () => {
+//     let newGraph = {
+//         formulaValue: 'x**2',
+//         color: 0xff0000,
+//         wireframe: true
+//     };
+//     graphs.push(newGraph);
+//     editors.appendChild(buildEditorElement(newGraph));
+//     renderGraph(newGraph);
+// });
 
 var graphContainer = document.getElementById('graph');
 
@@ -70,9 +72,6 @@ var render = function () {
 };
 
 render();
-initializeGraphs();
-
-
 
 function renderGraph(graph,t){
 
@@ -90,6 +89,8 @@ function renderGraph(graph,t){
         scene.add(graph.mesh);
     }
 
+    graph.mesh.material.color = new THREE.Color(graph.color);
+    graph.mesh.material.wireframe = graph.wireframe;
 
     let i = 0;
     for (let y = x_min; y < x_max+resolution;y +=resolution){   
@@ -103,26 +104,29 @@ function renderGraph(graph,t){
     graph.mesh.geometry.verticesNeedUpdate = true;
 }
 
+function initializeStats(){
+    stats = new Stats();
+    stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
+    document.body.appendChild( stats.dom );
+}
 
-
-function initializeGraphs() {
-    for (let graph of graphs) {
-        editors.prepend(buildEditorElement(graph));
-    }
+function initializeGui(){
+    gui = new dat.GUI({width: 400});
+    graphsFolder = gui.addFolder('Graphs');
+    graphsFolder.add({add:() => addGraph() },'add').name('Add graph');
+    addGraph();
 }
 
 
-function buildEditorElement(graph){
-    let container = document.createElement('div');
-    container.className = 'editor-row';
-    let input = document.createElement('input');
-    input.value = graph.formulaValue;
-
-    input.addEventListener('change', () => {
-        graph.formulaValue = input.value;
-        renderGraph(graph)
-    });
-
-    container.appendChild(input);
-    return container;
+function addGraph(){
+    let folder = graphsFolder.addFolder(`Graph #${graphs.length +1}`);
+    let graph = {
+        formulaValue: `Math.sin((x)*Math.PI)`,
+        color: 0x00ffff,
+        wireframe: true
+    };
+    graphs.push(graph);
+    folder.add(graph, 'formulaValue');
+    folder.addColor(graph, 'color');
+    folder.add(graph, 'wireframe');
 }
