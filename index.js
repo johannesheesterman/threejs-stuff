@@ -1,34 +1,11 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.121.1/build/three.module.js';
 import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.121.1/examples/jsm/controls/OrbitControls.js';
 
-
-var graphs = [
-    // {
-    //     formulaValue: 'Math.sin((x+t)*Math.PI)',
-    //     color: 0x00ffff,
-    //     wireframe: true
-    // },
-];
-
+var graphs = [];
 var stats;
 var gui, graphsFolder;
 initializeStats();
 initializeGui();
-
-
-
-
-// var addGraphBtn = document.getElementById('add-graph-btn');
-// addGraphBtn.addEventListener('click', () => {
-//     let newGraph = {
-//         formulaValue: 'x**2',
-//         color: 0xff0000,
-//         wireframe: true
-//     };
-//     graphs.push(newGraph);
-//     editors.appendChild(buildEditorElement(newGraph));
-//     renderGraph(newGraph);
-// });
 
 var graphContainer = document.getElementById('graph');
 
@@ -43,16 +20,11 @@ const controls = new OrbitControls( camera, renderer.domElement )
 controls.update();
 const axesHelper = new THREE.AxesHelper( 5 );
 scene.add( axesHelper );
-var mesh = null;
-
 
 var clock = new THREE.Clock();
 
-
 camera.position.z = 16;
 camera.position.y = 16;
-
-
 
 //Create an render loop to allow animation
 var render = function () {
@@ -116,7 +88,6 @@ function initializeGui(){
     graphsFolder.add({add:() => addGraph() },'add').name('Add graph');
     addGraph();
 }
-
 
 function addGraph(){
     let folder = graphsFolder.addFolder(`Graph #${graphs.length +1}`);
