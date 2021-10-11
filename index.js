@@ -2,9 +2,15 @@ import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.121.1/build/three.m
 import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.121.1/examples/jsm/controls/OrbitControls.js';
 
 
+var stats = new Stats();
+stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
+stats.dom.style.left = '200px';
+stats.dom.style.position = 'fixed';
+document.body.appendChild( stats.dom );
+
 var graphs = [
     {
-        formulaValue: 'Math.sin(x*Math.PI)',
+        formulaValue: 'Math.sin((x+t)*Math.PI)',
         color: 0x00ffff,
         wireframe: true
     },
@@ -38,6 +44,8 @@ scene.add( axesHelper );
 var mesh = null;
 
 
+var clock = new THREE.Clock();
+
 
 camera.position.z = 16;
 camera.position.y = 16;
@@ -46,10 +54,19 @@ camera.position.y = 16;
 
 //Create an render loop to allow animation
 var render = function () {
+    stats.begin();
+
     requestAnimationFrame( render );
+
+    var t = clock.getElapsedTime();
+
+    for (let graph of graphs){
+        renderGraph(graph, t);
+    }
 
     controls.update();
     renderer.render(scene, camera);
+    stats.end();
 };
 
 render();
@@ -57,46 +74,40 @@ initializeGraphs();
 
 
 
-function renderGraph(graph){
+function renderGraph(graph,t){
 
-    if (graph.mesh != null){
-        scene.remove(graph.mesh);
-    }
-
-    let f = (x,y) => eval(graph.formulaValue);
-
+    let f = (x,y,t) => eval(graph.formulaValue);
     const x_min = -4;
     const x_max = 4;
     const resolution = 0.1;
     const width = Math.abs(x_min) + Math.abs(x_max);
     const segments = width / resolution;
 
-    let plane = new THREE.PlaneGeometry(8, 8, segments, segments);
+    if (graph.mesh == null){
+        let plane = new THREE.PlaneGeometry(8, 8, segments, segments);
+        graph.mesh = new THREE.Mesh(plane, new THREE.MeshBasicMaterial({color: graph.color, wireframe: graph.wireframe, side: THREE.DoubleSide}));
+        graph.mesh.rotation.x = 3*Math.PI/2;
+        scene.add(graph.mesh);
+    }
+
 
     let i = 0;
     for (let y = x_min; y < x_max+resolution;y +=resolution){   
 
         for (let x = x_min; x < x_max+resolution; x+=resolution){
-            const z = f(x, y);
-            plane.vertices[i].z = z;
+            const z = f(x, y, t);
+            graph.mesh.geometry.vertices[i].z = z;
             i++;
         }
-    }
-
-  
-
-    graph.mesh = new THREE.Mesh(plane, new THREE.MeshBasicMaterial({color: graph.color, wireframe: graph.wireframe, side: THREE.DoubleSide}));
-    graph.mesh.rotation.x = 3*Math.PI/2;
-    scene.add(graph.mesh);
+    }   
+    graph.mesh.geometry.verticesNeedUpdate = true;
 }
 
 
 
 function initializeGraphs() {
-    for (let graph of graphs){
-        
+    for (let graph of graphs) {
         editors.prepend(buildEditorElement(graph));
-        renderGraph(graph);
     }
 }
 
@@ -108,7 +119,6 @@ function buildEditorElement(graph){
     input.value = graph.formulaValue;
 
     input.addEventListener('change', () => {
-        console.log('change');
         graph.formulaValue = input.value;
         renderGraph(graph)
     });
